@@ -1,12 +1,8 @@
 <?php 
+require "QueryBilder.php";
 $id=$_GET['id'];
-$pdo=new PDO("mysql:host=test;dbname=tasks","root","");
-$sql='SELECT * FROM `task` WHERE id=:id';
-$ex=$pdo->prepare($sql);
-$ex->bindParam("id",$id);
-$ex->execute();
-$task=$ex->fetch(PDO::FETCH_ASSOC);
-
+$qb = new QueryBilder;
+$task=$qb->showOne("task",$id);
 ?>
 
 <!DOCTYPE html>

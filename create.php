@@ -10,7 +10,7 @@
     <h1>Create new task</h1>
     <form action="store.php" method="post">
         <P>Nazva: <input type="text" name="title"></P>
-        <P>Opis: <textarea name="content"></textarea></P>
+        <P>Opis: <textarea name="descr"></textarea></P>
         <input type="submit">
     </form>
 </body>

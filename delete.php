@@ -1,8 +1,6 @@
 <?php 
+require "QueryBilder.php";
 $id=$_GET['id'];
-$pdo= new PDO("mysql:host=test;dbname=tasks","root","");
-$sql="DELETE FROM `task` WHERE id=:id";
-$ex=$pdo->prepare($sql);
-$ex->bindParam("id",$id);
-$ex->execute();
+$qb = new QueryBilder;
+$qb->delete("task",$id);
 header("Location: /");

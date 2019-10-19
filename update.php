@@ -1,13 +1,11 @@
 <?php
+require "QueryBilder.php";
 $data=[
     "id"=>$_GET['id'],
     "title"=>$_POST['title'],
-    "content"=>$_POST['content']
+    "descr"=>$_POST['descr']
 ];
-$id=$_GET['id'];
-$pdo=new PDO("mysql:host=test;dbname=tasks","root","");
-$sql='UPDATE `task` SET title=:title, descr=:content WHERE id=:id';
-$ex=$pdo->prepare($sql);
-$ex->execute($data);
+$qb = new QueryBilder;
+$qb->update("task",$data);
 
 header("Location: /");

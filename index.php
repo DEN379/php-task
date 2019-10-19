@@ -1,9 +1,7 @@
 <?php
-    $pdo = new PDO("mysql:host=test;dbname=tasks","root","");
-    $sql="SELECT * FROM `task`";
-    $ex=$pdo->prepare($sql);
-    $result=$ex->execute();
-    $tasks=$ex->fetchAll(PDO::FETCH_ASSOC);
+    require "QueryBilder.php";
+    $qb = new QueryBilder;
+    $tasks=$qb->show("task");
 ?>
 <!DOCTYPE html>
 <html lang="en">

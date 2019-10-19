@@ -1,13 +1,10 @@
 <?php
+require "QueryBilder.php";
 $id=$_GET['id'];
-$pdo = new PDO("mysql:host=test;dbname=tasks","root","");
-$sql='SELECT * FROM `task` WHERE id=:id';
-$ex=$pdo->prepare($sql);
-$ex->bindParam("id",$id);
-$ex->execute();
-$task=$ex->fetch(PDO::FETCH_ASSOC);
-
+$qb = new QueryBilder;
+$task=$qb->showOne("task",$id);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +16,7 @@ $task=$ex->fetch(PDO::FETCH_ASSOC);
 <body>
     <form action="update.php?id=<?= $task['id'];?>" method="post">
         <p>Nazva: <input type="text" name="title" value="<?=$task['title']; ?>"></p>
-        <p>Opis: <textarea name="content"><?=$task['descr'];?></textarea></p>
+        <p>Opis: <textarea name="descr"><?=$task['descr'];?></textarea></p>
         <input type="submit">
     </form>
 </body>
