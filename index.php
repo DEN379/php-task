@@ -2,6 +2,8 @@
     require "QueryBilder.php";
     $qb = new QueryBilder;
     $tasks=$qb->show("task");
+    
+    if(!session_start())session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,7 +15,18 @@
     <title>Task Manager</title>
 </head>
 <body>
+    <?php if(empty($_SESSION)): ?>
+        <H4><a href="register.php">Register</a></H4>
+        <H4><a href="login.php">Login</a></H4>
+    <?php else: ?> 
+        <form action="auth.php" method="post">
+        <input type="submit" name="logout" value="Logout">
+        </form>
+    <?php endif;?>
+    
+
     <H1>Tasks</H1>
+    <?php if(!empty($_SESSION)): ?>
     <div class="but">
         <button class="add""><a href="create.php">Add task</a></button>
     </div>
@@ -32,5 +45,6 @@
         <button class="delete"><a href="delete.php?id=<?= $task['id'];?>">Delete</a></button>
     </div>
     <?php endforeach; ?>
+    <?php endif;?>
 </body>
 </html>
