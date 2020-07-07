@@ -28,6 +28,7 @@ final class Cookie {
 	/** @var string name prefix indicating that the 'domain' attribute must *not* be set, the 'path' attribute must be '/' and the effects of {@see PREFIX_SECURE} apply as well */
 	const PREFIX_HOST = '__Host-';
 	const HEADER_PREFIX = 'Set-Cookie: ';
+	const SAME_SITE_RESTRICTION_NONE = 'None';
 	const SAME_SITE_RESTRICTION_LAX = 'Lax';
 	const SAME_SITE_RESTRICTION_STRICT = 'Strict';
 
@@ -45,7 +46,7 @@ final class Cookie {
 	private $httpOnly;
 	/** @var bool indicates that the cookie should be sent back by the client over secure HTTPS connections only */
 	private $secureOnly;
-	/** @var string|null indicates that the cookie should not be sent along with cross-site requests (either `null`, `Lax` or `Strict`) */
+	/** @var string|null indicates that the cookie should not be sent along with cross-site requests (either `null`, `None`, `Lax` or `Strict`) */
 	private $sameSiteRestriction;
 
 	/**
@@ -223,7 +224,7 @@ final class Cookie {
 	/**
 	 * Returns the same-site restriction of the cookie
 	 *
-	 * @return string|null whether the cookie should not be sent along with cross-site requests (either `null`, `Lax` or `Strict`)
+	 * @return string|null whether the cookie should not be sent along with cross-site requests (either `null`, `None`, `Lax` or `Strict`)
 	 */
 	public function getSameSiteRestriction() {
 		return $this->sameSiteRestriction;
@@ -232,7 +233,7 @@ final class Cookie {
 	/**
 	 * Sets the same-site restriction for the cookie
 	 *
-	 * @param string|null $sameSiteRestriction indicates that the cookie should not be sent along with cross-site requests (either `null`, `Lax` or `Strict`)
+	 * @param string|null $sameSiteRestriction indicates that the cookie should not be sent along with cross-site requests (either `null`, `None`, `Lax` or `Strict`)
 	 * @return static this instance for chaining
 	 */
 	public function setSameSiteRestriction($sameSiteRestriction) {
@@ -251,6 +252,19 @@ final class Cookie {
 	}
 
 	/**
+	 * Saves the cookie and immediately creates the corresponding variable in the superglobal `$_COOKIE` array
+	 *
+	 * The variable would otherwise only be available starting from the next HTTP request
+	 *
+	 * @return bool whether the cookie header has successfully been sent (and will *probably* cause the client to set the cookie)
+	 */
+	public function saveAndSet() {
+		$_COOKIE[$this->name] = $this->value;
+
+		return $this->save();
+	}
+
+	/**
 	 * Deletes the cookie
 	 *
 	 * @return bool whether the cookie header has successfully been sent (and will *probably* cause the client to delete the cookie)
@@ -263,6 +277,19 @@ final class Cookie {
 
 		// save the copied "deletion" cookie
 		return $copiedCookie->save();
+	}
+
+	/**
+	 * Deletes the cookie and immediately removes the corresponding variable from the superglobal `$_COOKIE` array
+	 *
+	 * The variable would otherwise only be deleted at the start of the next HTTP request
+	 *
+	 * @return bool whether the cookie header has successfully been sent (and will *probably* cause the client to delete the cookie)
+	 */
+	public function deleteAndUnset() {
+		unset($_COOKIE[$this->name]);
+
+		return $this->delete();
 	}
 
 	public function __toString() {
@@ -279,7 +306,7 @@ final class Cookie {
 	 * @param string|null $domain the domain that the cookie will be valid for (including subdomains) or `null` for the current host (excluding subdomains)
 	 * @param bool $secureOnly indicates that the cookie should be sent back by the client over secure HTTPS connections only
 	 * @param bool $httpOnly indicates that the cookie should be accessible through the HTTP protocol only and not through scripting languages
-	 * @param string|null $sameSiteRestriction indicates that the cookie should not be sent along with cross-site requests (either `null`, `Lax` or `Strict`)
+	 * @param string|null $sameSiteRestriction indicates that the cookie should not be sent along with cross-site requests (either `null`, `None`, `Lax` or `Strict`)
 	 * @return bool whether the cookie header has successfully been sent (and will *probably* cause the client to set the cookie)
 	 */
 	public static function setcookie($name, $value = null, $expiryTime = 0, $path = null, $domain = null, $secureOnly = false, $httpOnly = false, $sameSiteRestriction = null) {
@@ -298,7 +325,7 @@ final class Cookie {
 	 * @param string|null $domain the domain that the cookie will be valid for (including subdomains) or `null` for the current host (excluding subdomains)
 	 * @param bool $secureOnly indicates that the cookie should be sent back by the client over secure HTTPS connections only
 	 * @param bool $httpOnly indicates that the cookie should be accessible through the HTTP protocol only and not through scripting languages
-	 * @param string|null $sameSiteRestriction indicates that the cookie should not be sent along with cross-site requests (either `null`, `Lax` or `Strict`)
+	 * @param string|null $sameSiteRestriction indicates that the cookie should not be sent along with cross-site requests (either `null`, `None`, `Lax` or `Strict`)
 	 * @return string the HTTP header
 	 */
 	public static function buildCookieHeader($name, $value = null, $expiryTime = 0, $path = null, $domain = null, $secureOnly = false, $httpOnly = false, $sameSiteRestriction = null) {
@@ -356,7 +383,15 @@ final class Cookie {
 			$headerStr .= '; httponly';
 		}
 
-		if ($sameSiteRestriction === self::SAME_SITE_RESTRICTION_LAX) {
+		if ($sameSiteRestriction === self::SAME_SITE_RESTRICTION_NONE) {
+			// if the 'secure' attribute is missing
+			if (!$secureOnly) {
+				\trigger_error('When the \'SameSite\' attribute is set to \'None\', the \'secure\' attribute should be set as well', \E_USER_WARNING);
+			}
+
+			$headerStr .= '; SameSite=None';
+		}
+		elseif ($sameSiteRestriction === self::SAME_SITE_RESTRICTION_LAX) {
 			$headerStr .= '; SameSite=Lax';
 		}
 		elseif ($sameSiteRestriction === self::SAME_SITE_RESTRICTION_STRICT) {

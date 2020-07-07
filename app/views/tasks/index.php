@@ -11,40 +11,29 @@
 <!--            </form>-->
         <H4><a href="./tasks/logout">Logout</a></H4>
         <?php endif;?>
-    <div class="row">
-        <div class="col-md-12">
-            <h1>All Tasks</h1>
-            <?php if($_SESSION['user']): ?>
-            <a href="./tasks/create" class="btn btn-success">Add Task</a>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
+    <div class="container">
+        <H1 class="home"><a href="/app/tasks">My Tasks</a></H1>
+        <?php if($_SESSION['user']): ?>
+            <div class="but">
+                <a href="./tasks/create" class="btn btn-success">Add task</a> 
+            </div>
 
-                <tbody>
-                <?php foreach($tasks as $task):?>
-                    <tr>
-                        <td><?= $task['id'];?></td>
-                        <td><?= $task['title'];?></td>
-                        <td>
-                            <a href="./tasks/<?= $task['id'];?>" class="btn btn-info">
-                                Show
-                            </a>
-                            <a href="./tasks/<?= $task['id'];?>/edit" class="btn btn-warning">
-                                Edit
-                            </a>
-                            <a onclick="return confirm('are you sure?');" href="./tasks/<?= $task['id'];?>/delete" class="btn btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                <?php endforeach;?>
-
-                </tbody>
-            </table>
-            <?php endif;?>
-        </div>
+            <div class="task-example task">
+                <span>#</span>
+                <div>Title</div>
+                <div>Description</div>
+            </div>
+            <?php foreach ($tasks as $task): ?>
+            <div class="task">
+                <span><?= $task['id'];?></span>
+                <div><?= $task['title'];?></div>
+            <div class="description"><?= $task['descr'];?></div>
+                <a href="./tasks/<?= $task['id'];?>" class="btn btn-outline-primary">Show</a>
+                <a href="./tasks/<?= $task['id'];?>/edit" class="btn btn-warning">Edit</a>
+                <a onclick="return confirm('are you sure?');" href="./tasks/<?= $task['id'];?>/delete" class="btn btn-danger">Delete</a>
+            </div>
+            <?php endforeach; ?>
+            
+        <?php endif;?>
     </div>
 </div>

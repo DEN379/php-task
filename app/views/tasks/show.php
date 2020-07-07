@@ -1,5 +1,9 @@
 <?php $this->layout('layout') ?>
 
-<h1><?php echo $task['title'];?></h1>
-<h2><?php echo $task['descr'];?></h2>
-<a href="/app/tasks">Go Back</a>
+<div class="container">
+    <H1 class="home"><a href="/app/tasks">My Tasks</a></H1>
+        <label for="title">Title: </label>
+        <h1 id="title"><?=$task['title']; ?></h1>
+        <label for="description">Description: </label>
+        <h2 id="description"><?= $task['descr'];?></h2>
+    </div>

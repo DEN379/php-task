@@ -101,6 +101,11 @@ require __DIR__.'/../vendor/autoload.php';
 \testCookie('cookie[three]', 'cookiethree');
 \testCookie('cookie[two]', 'cookietwo');
 \testCookie('cookie[one]', 'cookieone');
+\testEqual((new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=Lax');
+@\testEqual((new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setSameSiteRestriction('None'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=None');
+\testEqual((new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setSameSiteRestriction('None')->setSecureOnly(true), 'Set-Cookie: SID=31d4d96e407aad42; path=/; secure; httponly; SameSite=None');
+@\testEqual((new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setDomain('localhost')->setSameSiteRestriction('None'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=None');
+\testEqual((new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setDomain('localhost')->setSameSiteRestriction('None')->setSecureOnly(true), 'Set-Cookie: SID=31d4d96e407aad42; path=/; secure; httponly; SameSite=None');
 \testEqual((new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setSameSiteRestriction('Strict'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=Strict');
 \testEqual((new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setDomain('localhost')->setSameSiteRestriction('Strict'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=Strict');
 \testEqual((new \Delight\Cookie\Cookie('key'))->setValue('value')->setDomain('localhost'), 'Set-Cookie: key=value; path=/; httponly; SameSite=Lax');
@@ -117,6 +122,8 @@ require __DIR__.'/../vendor/autoload.php';
 \testEqual(\Delight\Cookie\Cookie::parse('Set-Cookie: SID'), '');
 \testEqual(\Delight\Cookie\Cookie::parse('Set-Cookie: SID=31d4d96e407aad42'), 'Set-Cookie: SID=31d4d96e407aad42');
 \testEqual(\Delight\Cookie\Cookie::parse('Set-Cookie: SID=31d4d96e407aad42; path=/; httponly'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly');
+@\testEqual(\Delight\Cookie\Cookie::parse('Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=None'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=None');
+\testEqual(\Delight\Cookie\Cookie::parse('Set-Cookie: SID=31d4d96e407aad42; path=/; secure; httponly; SameSite=None'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; secure; httponly; SameSite=None');
 \testEqual(\Delight\Cookie\Cookie::parse('Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=Strict'), 'Set-Cookie: SID=31d4d96e407aad42; path=/; httponly; SameSite=Strict');
 
 \setcookie('hello', 'world', \time() + 86400, '/foo/', 'example.com', true, true);
@@ -141,12 +148,80 @@ $cookie = \Delight\Cookie\Cookie::parse(\Delight\Http\ResponseHeader::take('Set-
 \testEqual(\Delight\Cookie\Cookie::get('other'), (isset($_COOKIE['other']) ? $_COOKIE['other'] : null));
 \testEqual(\Delight\Cookie\Cookie::get('other', 42), (isset($_COOKIE['other']) ? $_COOKIE['other'] : 42));
 
+!isset($_COOKIE['cefa389e458b']) or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('cefa389e458b'))->setValue('a858c4a03224')->save();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: cefa389e458b=a858c4a03224; path=/; httponly; SameSite=Lax');
+!isset($_COOKIE['cefa389e458b']) or \fail(__LINE__);
+
+!isset($_COOKIE['c0f3a2ea81aa']) or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('c0f3a2ea81aa'))->setValue('dabf2c1490a5')->setDomain('example.com')->save();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: c0f3a2ea81aa=dabf2c1490a5; path=/; domain=.example.com; httponly; SameSite=Lax');
+!isset($_COOKIE['c0f3a2ea81aa']) or \fail(__LINE__);
+
+!isset($_COOKIE['c19718a89afd']) or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('c19718a89afd'))->setValue('f638cfcf49a8')->saveAndSet();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: c19718a89afd=f638cfcf49a8; path=/; httponly; SameSite=Lax');
+(isset($_COOKIE['c19718a89afd']) && $_COOKIE['c19718a89afd'] === 'f638cfcf49a8') or \fail(__LINE__);
+
+!isset($_COOKIE['b377b18ca9e6']) or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('b377b18ca9e6'))->setValue('dbeaebb92e43')->setDomain('example.com')->saveAndSet();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: b377b18ca9e6=dbeaebb92e43; path=/; domain=.example.com; httponly; SameSite=Lax');
+(isset($_COOKIE['b377b18ca9e6']) && $_COOKIE['b377b18ca9e6'] === 'dbeaebb92e43') or \fail(__LINE__);
+
+$_COOKIE['a8a78153b857'] = 'ed2e8ff8629f';
+(isset($_COOKIE['a8a78153b857']) && $_COOKIE['a8a78153b857'] === 'ed2e8ff8629f') or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('a8a78153b857'))->delete();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: a8a78153b857=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; httponly; SameSite=Lax');
+(isset($_COOKIE['a8a78153b857']) && $_COOKIE['a8a78153b857'] === 'ed2e8ff8629f') or \fail(__LINE__);
+unset($_COOKIE['a8a78153b857']);
+
+$_COOKIE['c5dd45883e4b'] = 'b42f7c9de3dd';
+(isset($_COOKIE['c5dd45883e4b']) && $_COOKIE['c5dd45883e4b'] === 'b42f7c9de3dd') or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('c5dd45883e4b'))->setDomain('example.com')->delete();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: c5dd45883e4b=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; domain=.example.com; httponly; SameSite=Lax');
+(isset($_COOKIE['c5dd45883e4b']) && $_COOKIE['c5dd45883e4b'] === 'b42f7c9de3dd') or \fail(__LINE__);
+unset($_COOKIE['c5dd45883e4b']);
+
+$_COOKIE['ed050c7d7e62'] = 'a8b362c78a04';
+(isset($_COOKIE['ed050c7d7e62']) && $_COOKIE['ed050c7d7e62'] === 'a8b362c78a04') or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('ed050c7d7e62'))->deleteAndUnset();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: ed050c7d7e62=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; httponly; SameSite=Lax');
+!isset($_COOKIE['ed050c7d7e62']) or \fail(__LINE__);
+unset($_COOKIE['ed050c7d7e62']);
+
+$_COOKIE['c8f13ff2a8ad'] = 'cd0a70b224e8';
+(isset($_COOKIE['c8f13ff2a8ad']) && $_COOKIE['c8f13ff2a8ad'] === 'cd0a70b224e8') or \fail(__LINE__);
+(new \Delight\Cookie\Cookie('c8f13ff2a8ad'))->setDomain('example.com')->deleteAndUnset();
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), 'Set-Cookie: c8f13ff2a8ad=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; domain=.example.com; httponly; SameSite=Lax');
+!isset($_COOKIE['c8f13ff2a8ad']) or \fail(__LINE__);
+unset($_COOKIE['c8f13ff2a8ad']);
+
 /* END TEST COOKIES */
 
 /* BEGIN TEST SESSION */
 
 (isset($_SESSION) === false) or \fail(__LINE__);
 (\Delight\Cookie\Session::id() === '') or \fail(__LINE__);
+
+\Delight\Cookie\Session::start();
+$sessionCookieReferenceHeader = \Delight\Http\ResponseHeader::take('Set-Cookie');
+session_write_close();
+
+\Delight\Cookie\Session::start(null);
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), \str_replace('; SameSite=Lax', '', $sessionCookieReferenceHeader));
+session_write_close();
+
+@\Delight\Cookie\Session::start('None');
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), \str_replace('; SameSite=Lax', '; SameSite=None', $sessionCookieReferenceHeader));
+session_write_close();
+
+\Delight\Cookie\Session::start('Lax');
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), $sessionCookieReferenceHeader);
+session_write_close();
+
+\Delight\Cookie\Session::start('Strict');
+\testEqual(\Delight\Http\ResponseHeader::take('Set-Cookie'), \str_replace('; SameSite=Lax', '; SameSite=Strict', $sessionCookieReferenceHeader));
+session_write_close();
 
 \Delight\Cookie\Session::start();
 
@@ -191,6 +266,7 @@ $oldSessionId = \Delight\Cookie\Session::id();
 (\Delight\Cookie\Session::has('key2') === false) or \fail(__LINE__);
 
 \session_destroy();
+\Delight\Http\ResponseHeader::take('Set-Cookie');
 
 /* END TEST SESSION */
 

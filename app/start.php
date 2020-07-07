@@ -15,7 +15,7 @@ $containerBuilder->addDefinitions([
         return new QueryFactory('mysql');
     },
     PDO::class => function() {
-        return new PDO("mysql:host=localhost;dbname=tasks","root","");
+        return new PDO("mysql:host=localhost;dbname=mydb","root","");
     }
 ]);
 $container = $containerBuilder->build();

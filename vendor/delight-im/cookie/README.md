@@ -50,23 +50,29 @@ $cookie->setDomain('example.com');
 $cookie->setHttpOnly(true);
 $cookie->setSecureOnly(true);
 $cookie->setSameSiteRestriction('Strict');
+
 // echo $cookie;
+// or
 $cookie->save();
+// or
+// $cookie->saveAndSet();
 ```
 
 The method calls can also be chained:
 
 ```php
-(new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setMaxAge(60 * 60 * 24)->setSameSiteRestriction('Strict')->save();
+(new \Delight\Cookie\Cookie('SID'))->setValue('31d4d96e407aad42')->setMaxAge(60 * 60 * 24)->setSameSiteRestriction('None')->save();
 ```
 
 A cookie can later be deleted simply like this:
 
 ```php
 $cookie->delete();
+// or
+$cookie->deleteAndUnset();
 ```
 
-**Note:** For the deletion to work, the cookie must have the same settings as the cookie that was originally saved. So you should remember to pass appropriate values to `setPath(...)`, `setDomain(...)`, `setHttpOnly(...)` and `setSecureOnly(...)` again.
+**Note:** For the deletion to work, the cookie must have the same settings as the cookie that was originally saved – except for its value, which doesn’t need to be set. So you should remember to pass appropriate values to `setPath(...)`, `setDomain(...)`, `setHttpOnly(...)` and `setSecureOnly(...)` again.
 
 ### Reading cookies
 
@@ -99,6 +105,8 @@ Using the `Session` class, you can start and resume sessions in a way that is co
 
 // start session and have session cookie without any same-site restriction
 \Delight\Cookie\Session::start(null);
+// or
+\Delight\Cookie\Session::start('None'); // Chrome 80+
 ```
 
 All three calls respect the settings from PHP’s `session_set_cookie_params(...)` function and the configuration options `session.name`, `session.cookie_lifetime`, `session.cookie_path`, `session.cookie_domain`, `session.cookie_secure`, `session.cookie_httponly` and `session.use_cookies`.
@@ -183,7 +191,8 @@ $cookieInstance = \Delight\Cookie\Cookie::parse($cookieHeader);
 
  * [RFC 2109](https://tools.ietf.org/html/rfc2109)
  * [RFC 6265](https://tools.ietf.org/html/rfc6265)
- * [Same-site Cookies](https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-02) (formerly [2016-06-20](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00) and [2016-04-06](https://tools.ietf.org/html/draft-west-first-party-cookies-07))
+ * [Same-site Cookies](https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-04) (formerly [2016-06-20](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00) and [2016-04-06](https://tools.ietf.org/html/draft-west-first-party-cookies-07))
+   * [Amendment](https://tools.ietf.org/html/draft-west-cookie-incrementalism-00): [Default to `Lax`](https://chromestatus.com/feature/5088147346030592) and [require `secure` attribute for `None`](https://chromestatus.com/feature/5633521622188032) (Note: There are [incompatible clients](https://www.chromium.org/updates/same-site/incompatible-clients))
 
 ## Contributing
 

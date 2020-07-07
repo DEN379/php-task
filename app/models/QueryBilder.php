@@ -8,7 +8,7 @@ class QueryBilder{
     public $pdo;
 
     function __construct(){
-        $this->pdo = new PDO("mysql:host=test;dbname=tasks","root","");
+        $this->pdo = new PDO("mysql:host=localhost;dbname=mydb","root","");
     }
 
     function show($table){

@@ -121,5 +121,6 @@ class HomeController
     public function auth()
     {
         echo $this->view->render('tasks/register');
+        header("Location: /app/tasks");
     }
 }
