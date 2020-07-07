@@ -5,7 +5,7 @@ $data=[
     "content"=>$_POST['content']
 ];
 $id=$_GET['id'];
-$pdo=new PDO("mysql:host=test;dbname=tasks","root","");
+$pdo=new PDO("mysql:host=localhost;dbname=mydb","root","");
 $sql='UPDATE `task` SET title=:title, descr=:content WHERE id=:id';
 $ex=$pdo->prepare($sql);
 $ex->execute($data);
